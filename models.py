@@ -13,9 +13,13 @@ class Employee(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    role = db.Column(db.String(50), default='employee', nullable=False)  # employee, manager, accountant, admin
+    manager_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     delegations = relationship("Delegation", back_populates="employee")
+    # Relacja self-referential dla manager-employee
+    manager = relationship("Employee", remote_side=[id], backref="subordinates")
 
 class Delegation(db.Model):
     __tablename__ = 'delegation'
@@ -24,13 +28,16 @@ class Delegation(db.Model):
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String, default='draft')
+    status = db.Column(db.String, default='draft')  # draft, pending, approved, rejected, cancelled
+    destination = db.Column(db.String(255))  # Miejsce delegacji
+    purpose = db.Column(db.Text)  # Cel delegacji
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     closed_at = db.Column(db.DateTime)
     export_date = db.Column(db.DateTime)
     
     employee = relationship("Employee", back_populates="delegations")
     expenses = relationship("Expense", back_populates="delegation")
+    documents = relationship("Document", back_populates="delegation", cascade="all, delete-orphan")
 
 class Expense(db.Model):
     __tablename__ = 'expense'
@@ -84,3 +91,18 @@ class ExchangeRate(db.Model):
     
     # Relacja zgodna z diagramem ERD: currency -> exchange_rate (1:N)
     currency = relationship("Currency", back_populates="exchange_rates")
+
+class Document(db.Model):
+    __tablename__ = 'document'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    delegation_id = db.Column(db.Integer, db.ForeignKey('delegation.id'), nullable=False)
+    expense_id = db.Column(db.Integer, db.ForeignKey('expense.id'), nullable=True)  # Opcjonalne - dokument może być przypisany do wydatku
+    filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    file_type = db.Column(db.String(50))  # pdf, jpg, png, etc.
+    description = db.Column(db.Text)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    delegation = relationship("Delegation", back_populates="documents")
+    expense = relationship("Expense", backref="documents")

@@ -107,7 +107,7 @@ def login():
             }), 401
         
         # Generowanie JWT tokena
-        access_token = create_access_token(identity=employee.id)
+        access_token = create_access_token(identity=str(employee.id))
         
         # Przygotowanie odpowiedzi
         response_data = {
@@ -117,7 +117,9 @@ def login():
             "employee": {
                 "id": employee.id,
                 "username": employee.username,
-                "email": employee.email
+                "email": employee.email,
+                "role": employee.role,
+                "is_active": employee.is_active
             }
         }
         
@@ -147,7 +149,9 @@ def get_current_employee():
             "id": employee.id,
             "username": employee.username,
             "email": employee.email,
+            "role": employee.role,
             "is_active": employee.is_active,
+            "manager_id": employee.manager_id,
             "created_at": employee.created_at.isoformat() if employee.created_at else None
         }
         
@@ -182,3 +186,59 @@ def verify_token():
             "status": "error",
             "message": str(e)
         }), 401
+
+@bp.route('/change-password', methods=['POST'])
+@jwt_required()
+def change_password():
+    """Zmiana hasła przez użytkownika"""
+    try:
+        employee_id = get_jwt_identity()
+        employee = Employee.query.get(employee_id)
+        
+        if not employee:
+            return jsonify({
+                "status": "error",
+                "message": "Employee not found"
+            }), 404
+        
+        data = request.get_json() or {}
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+        
+        if not old_password or not new_password:
+            return jsonify({
+                "status": "error",
+                "message": "Old password and new password are required"
+            }), 400
+        
+        if len(new_password) < 8:
+            return jsonify({
+                "status": "error",
+                "message": "New password must be at least 8 characters long"
+            }), 400
+        
+        # Weryfikacja starego hasła
+        bcrypt = get_bcrypt()
+        if not bcrypt.check_password_hash(employee.password, old_password):
+            return jsonify({
+                "status": "error",
+                "message": "Invalid old password"
+            }), 401
+        
+        # Hashowanie nowego hasła
+        hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        employee.password = hashed_password
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Password changed successfully"
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500

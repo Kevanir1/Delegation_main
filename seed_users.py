@@ -19,12 +19,35 @@ def seed_dev_users():
     
     print("[SEED] DEV_SEED enabled, checking for test users...")
     
-    # Test user data
+    # Test user data - po jednym koncie dla każdej roli
     test_users = [
         {
-            'username': 'adamas',
-            'email': 'adamas@example.com',
-            'password': '12345678'
+            'username': 'pracownik',
+            'email': 'pracownik@example.com',
+            'password': '12345678',
+            'role': 'employee',
+            'manager_id': None  # Będzie przypisany do menedżera później
+        },
+        {
+            'username': 'menedzer',
+            'email': 'menedzer@example.com',
+            'password': '12345678',
+            'role': 'manager',
+            'manager_id': None
+        },
+        {
+            'username': 'ksiegowy',
+            'email': 'ksiegowy@example.com',
+            'password': '12345678',
+            'role': 'accountant',
+            'manager_id': None
+        },
+        {
+            'username': 'admin',
+            'email': 'admin@example.com',
+            'password': '12345678',
+            'role': 'admin',
+            'manager_id': None
         }
     ]
     
@@ -33,12 +56,16 @@ def seed_dev_users():
         print("[SEED] ERROR: Bcrypt not initialized")
         return
     
+    # Najpierw utwórz wszystkich użytkowników
+    created_users = {}
+    
     for user_data in test_users:
         # Check if user already exists
         existing_user = Employee.query.filter_by(email=user_data['email']).first()
         
         if existing_user:
             print(f"[SEED] User '{user_data['username']}' ({user_data['email']}) already exists, skipping")
+            created_users[user_data['role']] = existing_user
             continue
         
         # Hash password using the same logic as /api/auth/register
@@ -49,16 +76,33 @@ def seed_dev_users():
             username=user_data['username'],
             email=user_data['email'],
             password=hashed_password,
-            is_active=True
+            role=user_data['role'],
+            is_active=True,
+            manager_id=user_data.get('manager_id')
         )
         
         try:
             db.session.add(new_user)
             db.session.commit()
-            print(f"[SEED] ✓ Created test user: '{user_data['username']}' ({user_data['email']})")
+            print(f"[SEED] ✓ Created test user: '{user_data['username']}' ({user_data['email']}) - Role: {user_data['role']}")
+            created_users[user_data['role']] = new_user
         except Exception as e:
             db.session.rollback()
             print(f"[SEED] ✗ Failed to create user '{user_data['username']}': {e}")
+    
+    # Przypisz pracownika do menedżera
+    if 'employee' in created_users and 'manager' in created_users:
+        employee = created_users['employee']
+        manager = created_users['manager']
+        
+        if employee.manager_id != manager.id:
+            employee.manager_id = manager.id
+            try:
+                db.session.commit()
+                print(f"[SEED] ✓ Assigned employee '{employee.username}' to manager '{manager.username}'")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[SEED] ✗ Failed to assign manager: {e}")
     
     print("[SEED] Seed complete")
 

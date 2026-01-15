@@ -4,6 +4,8 @@ CREATE TABLE "employee" (
   "email" varchar(120) UNIQUE NOT NULL,
   "password" varchar(255) NOT NULL,
   "is_active" boolean DEFAULT true NOT NULL,
+  "role" varchar(50) DEFAULT 'employee' NOT NULL,
+  "manager_id" integer,
   "created_at" timestamp
 );
 
@@ -28,6 +30,8 @@ CREATE TABLE "delegation" (
   "start_date" date NOT NULL,
   "end_date" date NOT NULL,
   "status" varchar DEFAULT 'draft',
+  "destination" varchar(255),
+  "purpose" text,
   "created_at" timestamp,
   "closed_at" timestamp,
   "export_date" timestamp
@@ -51,6 +55,17 @@ CREATE TABLE "exchange_rate" (
 );
 
 CREATE UNIQUE INDEX ON "exchange_rate" ("currency_id", "date_set");
+
+CREATE TABLE "document" (
+  "id" serial PRIMARY KEY,
+  "delegation_id" integer NOT NULL,
+  "expense_id" integer,
+  "filename" varchar(255) NOT NULL,
+  "file_path" varchar(500) NOT NULL,
+  "file_type" varchar(50),
+  "description" text,
+  "uploaded_at" timestamp DEFAULT CURRENT_TIMESTAMP
+);
 
 COMMENT ON COLUMN "expense"."explanation" IS 'Note why the expense was needed';
 

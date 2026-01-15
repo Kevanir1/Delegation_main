@@ -28,3 +28,21 @@ ALTER TABLE "exchange_rate"
   ADD CONSTRAINT "fk_exchange_rate_currency"
   FOREIGN KEY ("currency_id") REFERENCES "currency" ("id")
   ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- employee -> employee (self-referential for manager-employee relationship)
+ALTER TABLE "employee"
+  ADD CONSTRAINT "fk_employee_manager"
+  FOREIGN KEY ("manager_id") REFERENCES "employee" ("id")
+  ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- delegation -> document (1:N)
+ALTER TABLE "document"
+  ADD CONSTRAINT "fk_document_delegation"
+  FOREIGN KEY ("delegation_id") REFERENCES "delegation" ("id")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- expense -> document (1:N)
+ALTER TABLE "document"
+  ADD CONSTRAINT "fk_document_expense"
+  FOREIGN KEY ("expense_id") REFERENCES "expense" ("id")
+  ON DELETE CASCADE ON UPDATE CASCADE;
