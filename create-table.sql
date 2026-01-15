@@ -1,21 +1,10 @@
-CREATE TABLE "user" (
+CREATE TABLE "employee" (
   "id" serial PRIMARY KEY,
   "username" varchar(120) UNIQUE NOT NULL,
   "email" varchar(120) UNIQUE NOT NULL,
   "password" varchar(255) NOT NULL,
   "is_active" boolean DEFAULT true NOT NULL,
-  "employee_id" integer,
-  "created_at" timestamp,
-  FOREIGN KEY ("employee_id") REFERENCES "employee" ("id")
-);
-
-CREATE TABLE "employee" (
-  "id" serial PRIMARY KEY,
-  "name" varchar,
-  "surname" varchar,
-  "sex" varchar,
-  "role" varchar,
-  "createdAt" timestamp
+  "created_at" timestamp
 );
 
 CREATE TABLE "expense" (

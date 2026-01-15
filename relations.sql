@@ -28,9 +28,3 @@ ALTER TABLE "exchange_rate"
   ADD CONSTRAINT "fk_exchange_rate_currency"
   FOREIGN KEY ("currency_id") REFERENCES "currency" ("id")
   ON DELETE CASCADE ON UPDATE CASCADE;
-
--- user -> employee (opcjonalna relacja dla autentykacji)
-ALTER TABLE "user"
-  ADD CONSTRAINT "fk_user_employee"
-  FOREIGN KEY ("employee_id") REFERENCES "employee" ("id")
-  ON DELETE SET NULL ON UPDATE CASCADE;

@@ -5,8 +5,8 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-class User(db.Model):
-    __tablename__ = 'user'
+class Employee(db.Model):
+    __tablename__ = 'employee'
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
@@ -14,21 +14,6 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relacja z Employee (opcjonalna - dla autentykacji, nie jest w diagramie ERD)
-    # Diagram ERD pokazuje tylko employee, ale user jest potrzebny do logowania
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=True)
-    employee = relationship("Employee", backref="users")
-
-class Employee(db.Model):
-    __tablename__ = 'employee'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    surname = db.Column(db.String, nullable=False)
-    sex = db.Column(db.String)
-    role = db.Column(db.String)
-    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     
     delegations = relationship("Delegation", back_populates="employee")
 
