@@ -67,11 +67,15 @@
 {
   "start_date": "YYYY-MM-DD",
   "end_date": "YYYY-MM-DD",
+  "country": "string (optional)",
+  "city": "string (optional)",
+  "name": "string (optional)",
+  "purpose": "string (optional)",
   "status": "string (optional, default: 'draft')"
 }
 ```
 **Response:**
-- 201: `{"id": int, "start_date": "date", "end_date": "date", "status": "string"}`
+- 201: `{"id": int, "start_date": "date", "end_date": "date", "status": "string", "country": "string", "city": "string", "name": "string", "purpose": "string"}`
 
 ### GET `/api/delegations/<id>`
 **Opis:** Pobranie szczegółów delegacji
@@ -88,11 +92,15 @@
 {
   "start_date": "YYYY-MM-DD",
   "end_date": "YYYY-MM-DD",
+  "country": "string",
+  "city": "string",
+  "name": "string",
+  "purpose": "string",
   "status": "string"
 }
 ```
 **Response:**
-- 200: `{"id": int, "start_date": "date", "end_date": "date", "status": "string"}`
+- 200: `{"id": int, "start_date": "date", "end_date": "date", "status": "string", "country": "string", "city": "string", "name": "string", "purpose": "string"}`
 
 ### DELETE `/api/delegations/<id>`
 **Opis:** Usunięcie delegacji

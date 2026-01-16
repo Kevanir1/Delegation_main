@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from dotenv import load_dotenv
 from sqlalchemy import text
+from datetime import timedelta
 import os
 from models import db
 from routes.auth import bp as auth_bp
@@ -37,6 +38,7 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:password@localhost:5
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 app.config['DEV_SEED'] = os.getenv('DEV_SEED', 'false')
 
 # Initialize extensions

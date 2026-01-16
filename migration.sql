@@ -35,15 +35,32 @@ BEGIN
     END IF;
 END $$;
 
--- Add destination and purpose columns to delegation table if they don't exist
+-- Add country, city, name and purpose columns to delegation table if they don't exist
+-- Drop destination column if it exists (migration from old schema)
 DO $$ 
 BEGIN
-    -- Add destination column
+    -- Add country column
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'delegation' AND column_name = 'destination'
+        WHERE table_name = 'delegation' AND column_name = 'country'
     ) THEN
-        ALTER TABLE "delegation" ADD COLUMN "destination" varchar(255);
+        ALTER TABLE "delegation" ADD COLUMN "country" varchar(100);
+    END IF;
+
+    -- Add city column
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'delegation' AND column_name = 'city'
+    ) THEN
+        ALTER TABLE "delegation" ADD COLUMN "city" varchar(100);
+    END IF;
+
+    -- Add name column
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'delegation' AND column_name = 'name'
+    ) THEN
+        ALTER TABLE "delegation" ADD COLUMN "name" varchar(255);
     END IF;
 
     -- Add purpose column
@@ -52,6 +69,14 @@ BEGIN
         WHERE table_name = 'delegation' AND column_name = 'purpose'
     ) THEN
         ALTER TABLE "delegation" ADD COLUMN "purpose" text;
+    END IF;
+
+    -- Drop old destination column if it exists
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'delegation' AND column_name = 'destination'
+    ) THEN
+        ALTER TABLE "delegation" DROP COLUMN "destination";
     END IF;
 END $$;
 
