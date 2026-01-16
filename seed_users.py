@@ -36,13 +36,6 @@ def seed_dev_users():
             'manager_id': None
         },
         {
-            'username': 'ksiegowy',
-            'email': 'ksiegowy@example.com',
-            'password': '12345678',
-            'role': 'accountant',
-            'manager_id': None
-        },
-        {
             'username': 'admin',
             'email': 'admin@example.com',
             'password': '12345678',
