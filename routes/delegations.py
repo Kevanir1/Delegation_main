@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Delegation, Employee, Document
+from models import db, Delegation, Employee, Document, Expense
 from datetime import datetime
 from utils import get_current_employee
 
@@ -82,6 +82,66 @@ def create_delegation():
         )
         
         db.session.add(new_delegation)
+        db.session.flush()  # Flush to get the delegation ID
+        
+        # Handle expenses if provided
+        created_expenses = []
+        expenses_data = data.get('expenses', [])
+        
+        if expenses_data:
+            for expense_data in expenses_data:
+                # Validate required fields for expense
+                if not expense_data.get('amount'):
+                    db.session.rollback()
+                    return jsonify({
+                        "status": "error",
+                        "message": "Each expense must have an amount"
+                    }), 400
+                
+                if not expense_data.get('currency_id'):
+                    db.session.rollback()
+                    return jsonify({
+                        "status": "error",
+                        "message": "Each expense must have a currency_id"
+                    }), 400
+                
+                if not expense_data.get('category_id'):
+                    db.session.rollback()
+                    return jsonify({
+                        "status": "error",
+                        "message": "Each expense must have a category_id"
+                    }), 400
+                
+                # Parse payed_at if provided
+                payed_at = None
+                if expense_data.get('payed_at'):
+                    try:
+                        payed_at = datetime.strptime(expense_data['payed_at'], '%Y-%m-%d %H:%M:%S')
+                    except ValueError:
+                        try:
+                            payed_at = datetime.strptime(expense_data['payed_at'], '%Y-%m-%d')
+                        except ValueError:
+                            db.session.rollback()
+                            return jsonify({
+                                "status": "error",
+                                "message": "Invalid payed_at format. Use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
+                            }), 400
+                
+                new_expense = Expense(
+                    delegation_id=new_delegation.id,
+                    explanation=expense_data.get('explanation'),
+                    payed_at=payed_at,
+                    amount=expense_data['amount'],
+                    pln_amount=expense_data.get('pln_amount', expense_data['amount']),
+                    exchange_rate=expense_data.get('exchange_rate', 1.0),
+                    currency_id=expense_data['currency_id'],
+                    category_id=expense_data['category_id'],
+                    status=expense_data.get('status', 'draft')
+                )
+                
+                db.session.add(new_expense)
+                created_expenses.append(new_expense)
+        
         db.session.commit()
         
         return jsonify({
@@ -93,7 +153,18 @@ def create_delegation():
                 'end_date': new_delegation.end_date.isoformat(),
                 'status': new_delegation.status,
                 'destination': new_delegation.destination,
-                'purpose': new_delegation.purpose
+                'purpose': new_delegation.purpose,
+                'expenses': [{
+                    'id': exp.id,
+                    'explanation': exp.explanation,
+                    'payed_at': exp.payed_at.isoformat() if exp.payed_at else None,
+                    'amount': float(exp.amount),
+                    'pln_amount': float(exp.pln_amount),
+                    'exchange_rate': float(exp.exchange_rate),
+                    'currency_id': exp.currency_id,
+                    'category_id': exp.category_id,
+                    'status': exp.status
+                } for exp in created_expenses]
             }
         }), 201
     
