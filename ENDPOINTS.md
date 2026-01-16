@@ -117,20 +117,23 @@
 - 200: `[{"id": int, "amount": decimal, "pln_amount": decimal, ...}]`
 
 ### POST `/api/delegations/<delegation_id>/expenses`
-**Opis:** Dodanie wydatku do delegacji
+**Opis:** Dodanie wydatku do delegacji. 
+**Note:** `pln_amount` i `exchange_rate` są obliczane automatycznie na backendzie na podstawie `amount` i `currency_id`.
 **Headers:** `Authorization: Bearer <token>`
 **Request Body:**
 ```json
 {
-  "explanation": "string",
-  "payed_at": "YYYY-MM-DD",
+  "explanation": "string (optional)",
+  "payed_at": "YYYY-MM-DD (optional)",
   "amount": decimal,
   "currency_id": int,
-  "category_id": int
+  "category_id": int,
+  "status": "string (optional, default: 'draft')"
 }
 ```
 **Response:**
-- 201: `{"id": int, "amount": decimal, "pln_amount": decimal, ...}`
+- 201: `{"id": int, "amount": decimal, "pln_amount": decimal, "exchange_rate": decimal, ...}`
+- 400: `{"status": "error", "message": "No exchange rate found for currency_id"}`
 
 ## Użytkownicy (Users) - Opcjonalne
 
