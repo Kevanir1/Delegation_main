@@ -29,8 +29,8 @@ class Delegation(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String, default='draft')  # draft, pending, approved, rejected, cancelled
-    destination = db.Column(db.String(255))  # Miejsce delegacji
-    purpose = db.Column(db.Text)  # Cel delegacji
+    destination = db.Column(db.String(255))
+    purpose = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     closed_at = db.Column(db.DateTime)
     export_date = db.Column(db.DateTime)
@@ -100,7 +100,7 @@ class Document(db.Model):
     expense_id = db.Column(db.Integer, db.ForeignKey('expense.id'), nullable=True)  # Opcjonalne - dokument może być przypisany do wydatku
     filename = db.Column(db.String(255), nullable=False)
     file_path = db.Column(db.String(500), nullable=False)
-    file_type = db.Column(db.String(50))  # pdf, jpg, png, etc.
+    file_type = db.Column(db.String(50))
     description = db.Column(db.Text)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     

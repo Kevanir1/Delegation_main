@@ -2,8 +2,9 @@
 DEV-ONLY: Seed script to create test users
 Only runs when DEV_SEED=true environment variable is set
 """
-from models import db, Employee
+from models import db, Employee, ExpenseCategory, Currency, ExchangeRate
 from flask import current_app
+from datetime import date
 
 
 def seed_dev_users():
@@ -17,7 +18,93 @@ def seed_dev_users():
         print("[SEED] DEV_SEED not enabled, skipping seed")
         return
     
-    print("[SEED] DEV_SEED enabled, checking for test users...")
+    print("[SEED] DEV_SEED enabled, checking for test data...")
+    
+    # First, seed expense categories
+    seed_expense_categories()
+    
+    # Then, seed currencies and exchange rates
+    seed_currencies()
+    
+    # Finally, seed users
+    seed_users()
+    
+    print("[SEED] Seed complete")
+
+
+def seed_expense_categories():
+    """Create expense categories if they don't exist"""
+    categories = [
+        'Hotel',
+        'Transport',
+        'Food',
+        'Conference',
+        'Other'
+    ]
+    
+    for category_name in categories:
+        existing = ExpenseCategory.query.filter_by(name=category_name).first()
+        if not existing:
+            new_category = ExpenseCategory(name=category_name)
+            try:
+                db.session.add(new_category)
+                db.session.commit()
+                print(f"[SEED] ✓ Created expense category: '{category_name}'")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[SEED] ✗ Failed to create category '{category_name}': {e}")
+        else:
+            print(f"[SEED] Expense category '{category_name}' already exists, skipping")
+
+
+def seed_currencies():
+    """Create currencies and exchange rates if they don't exist"""
+    currencies_data = [
+        {'name': 'PLN'},
+        {'name': 'EUR'},
+        {'name': 'USD'},
+        {'name': 'GBP'}
+    ]
+    
+    exchange_rates_data = {
+        'PLN': 1.0,
+        'EUR': 4.30,
+        'USD': 4.05,
+        'GBP': 5.10
+    }
+    
+    for currency_data in currencies_data:
+        existing = Currency.query.filter_by(name=currency_data['name']).first()
+        if not existing:
+            new_currency = Currency(name=currency_data['name'])
+            try:
+                db.session.add(new_currency)
+                db.session.commit()
+                print(f"[SEED] ✓ Created currency: '{currency_data['name']}'")
+                
+                # Add exchange rate
+                rate = exchange_rates_data.get(currency_data['name'], 1.0)
+                exchange_rate = ExchangeRate(
+                    currency_id=new_currency.id,
+                    rate_to_pln=rate,
+                    date_set=date.today()
+                )
+                db.session.add(exchange_rate)
+                db.session.commit()
+                print(f"[SEED] ✓ Created exchange rate for '{currency_data['name']}': {rate} PLN")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[SEED] ✗ Failed to create currency '{currency_data['name']}': {e}")
+        else:
+            print(f"[SEED] Currency '{currency_data['name']}' already exists, skipping")
+
+
+def seed_users():
+    """
+    Create test users for development
+    Only creates users if they don't already exist
+    """
+    print("[SEED] Checking for test users...")
     
     # Test user data - po jednym koncie dla każdej roli
     test_users = [
@@ -96,8 +183,6 @@ def seed_dev_users():
             except Exception as e:
                 db.session.rollback()
                 print(f"[SEED] ✗ Failed to assign manager: {e}")
-    
-    print("[SEED] Seed complete")
 
 
 def init_seed(app):
