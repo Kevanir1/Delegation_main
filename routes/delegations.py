@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Delegation, Employee, Document, Expense
-from datetime import datetime
+from models import db, Delegation, Employee, Document, Expense, ExchangeRate, Currency
+from datetime import datetime, date
 from utils import get_current_employee
 
 bp = Blueprint('delegations', __name__)
@@ -116,6 +116,26 @@ def create_delegation():
                         "message": "Each expense must have a category_id"
                     }), 400
                 
+                # Get the exchange rate for the currency
+                currency_id = expense_data['currency_id']
+                
+                # Get the most recent exchange rate for this currency
+                exchange_rate_obj = ExchangeRate.query.filter_by(
+                    currency_id=currency_id
+                ).order_by(ExchangeRate.date_set.desc()).first()
+                
+                if not exchange_rate_obj:
+                    db.session.rollback()
+                    return jsonify({
+                        "status": "error",
+                        "message": f"No exchange rate found for currency_id {currency_id}"
+                    }), 400
+                
+                # Calculate PLN amount
+                amount = float(expense_data['amount'])
+                exchange_rate = float(exchange_rate_obj.rate_to_pln)
+                pln_amount = amount * exchange_rate
+                
                 # Parse payed_at if provided
                 payed_at = None
                 if expense_data.get('payed_at'):
@@ -135,10 +155,10 @@ def create_delegation():
                     delegation_id=new_delegation.id,
                     explanation=expense_data.get('explanation'),
                     payed_at=payed_at,
-                    amount=expense_data['amount'],
-                    pln_amount=expense_data.get('pln_amount', expense_data['amount']),
-                    exchange_rate=expense_data.get('exchange_rate', 1.0),
-                    currency_id=expense_data['currency_id'],
+                    amount=amount,
+                    pln_amount=pln_amount,
+                    exchange_rate=exchange_rate,
+                    currency_id=currency_id,
                     category_id=expense_data['category_id'],
                     status=expense_data.get('status', 'draft')
                 )
