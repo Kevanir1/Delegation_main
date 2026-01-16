@@ -40,7 +40,9 @@ def get_subordinates_delegations():
                 'start_date': d.start_date.isoformat() if d.start_date else None,
                 'end_date': d.end_date.isoformat() if d.end_date else None,
                 'status': d.status,
-                'destination': d.destination,
+                'country': d.country,
+                'city': d.city,
+                'name': d.name,
                 'purpose': d.purpose,
                 'created_at': d.created_at.isoformat() if d.created_at else None
             })

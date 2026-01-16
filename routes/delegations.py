@@ -27,7 +27,9 @@ def get_delegations():
                 'start_date': d.start_date.isoformat() if d.start_date else None,
                 'end_date': d.end_date.isoformat() if d.end_date else None,
                 'status': d.status,
-                'destination': d.destination,
+                'country': d.country,
+                'city': d.city,
+                'name': d.name,
                 'purpose': d.purpose,
                 'created_at': d.created_at.isoformat() if d.created_at else None
             } for d in delegations]
@@ -77,7 +79,9 @@ def create_delegation():
             start_date=start_date,
             end_date=end_date,
             status=data.get('status', 'draft'),
-            destination=data.get('destination'),
+            country=data.get('country'),
+            city=data.get('city'),
+            name=data.get('name'),
             purpose=data.get('purpose')
         )
         
@@ -152,7 +156,9 @@ def create_delegation():
                 'start_date': new_delegation.start_date.isoformat(),
                 'end_date': new_delegation.end_date.isoformat(),
                 'status': new_delegation.status,
-                'destination': new_delegation.destination,
+                'country': new_delegation.country,
+                'city': new_delegation.city,
+                'name': new_delegation.name,
                 'purpose': new_delegation.purpose,
                 'expenses': [{
                     'id': exp.id,
@@ -231,7 +237,9 @@ def get_delegation(delegation_id):
                 'start_date': delegation.start_date.isoformat() if delegation.start_date else None,
                 'end_date': delegation.end_date.isoformat() if delegation.end_date else None,
                 'status': delegation.status,
-                'destination': delegation.destination,
+                'country': delegation.country,
+                'city': delegation.city,
+                'name': delegation.name,
                 'purpose': delegation.purpose,
                 'created_at': delegation.created_at.isoformat() if delegation.created_at else None,
                 'documents': [{
@@ -286,8 +294,14 @@ def update_delegation(delegation_id):
         if 'end_date' in data:
             delegation.end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
         
-        if 'destination' in data:
-            delegation.destination = data['destination']
+        if 'country' in data:
+            delegation.country = data['country']
+        
+        if 'city' in data:
+            delegation.city = data['city']
+        
+        if 'name' in data:
+            delegation.name = data['name']
         
         if 'purpose' in data:
             delegation.purpose = data['purpose']
@@ -310,7 +324,9 @@ def update_delegation(delegation_id):
                 'start_date': delegation.start_date.isoformat() if delegation.start_date else None,
                 'end_date': delegation.end_date.isoformat() if delegation.end_date else None,
                 'status': delegation.status,
-                'destination': delegation.destination,
+                'country': delegation.country,
+                'city': delegation.city,
+                'name': delegation.name,
                 'purpose': delegation.purpose
             }
         }), 200

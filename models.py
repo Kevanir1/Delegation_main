@@ -29,7 +29,9 @@ class Delegation(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String, default='draft')  # draft, pending, approved, rejected, cancelled
-    destination = db.Column(db.String(255))
+    country = db.Column(db.String(100))
+    city = db.Column(db.String(100))
+    name = db.Column(db.String(255))
     purpose = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     closed_at = db.Column(db.DateTime)
