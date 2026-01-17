@@ -211,7 +211,7 @@ def create_delegation():
 @jwt_required()
 def get_delegation(delegation_id):
     """Pobranie szczegółów delegacji"""
-    employee_id = get_jwt_identity()
+    employee_id = int(get_jwt_identity())
     
     try:
         delegation = Delegation.query.get(delegation_id)
@@ -243,11 +243,13 @@ def get_delegation(delegation_id):
         if not can_access:
             return jsonify({
                 "status": "error",
-                "message": "Access denied"
+                "message": "Access denied",
             }), 403
         
         # Pobierz dokumenty
         documents = Document.query.filter_by(delegation_id=delegation_id).all()
+
+        expenses = Expense.query.filter_by(delegation_id=delegation_id).all()
         
         return jsonify({
             "status": "success",
@@ -268,7 +270,16 @@ def get_delegation(delegation_id):
                     'file_type': doc.file_type,
                     'description': doc.description,
                     'uploaded_at': doc.uploaded_at.isoformat() if doc.uploaded_at else None
-                } for doc in documents]
+                } for doc in documents],
+                'expenses': [{
+                    'id': exp.id,
+                    'delegation_id': exp.delegation_id,
+                    'amount': exp.amount,
+                    'payed_at': exp.payed_at.isoformat() if exp.payed_at else None,
+                    'category_id': exp.category_id,
+                    'status': exp.status,
+                    'explanation': exp.explanation,
+                } for exp in expenses]
             }
         }), 200
     
