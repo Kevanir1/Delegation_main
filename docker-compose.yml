@@ -45,6 +45,7 @@ services:
       - FLASK_ENV=development
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379
+      - DEV_SEED=true
     depends_on:
       postgres:
         condition: service_healthy

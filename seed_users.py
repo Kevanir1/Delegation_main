@@ -112,6 +112,8 @@ def seed_users():
             'username': 'pracownik',
             'email': 'pracownik@example.com',
             'password': '12345678',
+            'first_name': 'Jan',
+            'last_name': 'Kowalski',
             'role': 'employee',
             'manager_id': None  # Będzie przypisany do menedżera później
         },
@@ -119,6 +121,8 @@ def seed_users():
             'username': 'menedzer',
             'email': 'menedzer@example.com',
             'password': '12345678',
+            'first_name': 'Piotr',
+            'last_name': 'Nowak',
             'role': 'manager',
             'manager_id': None
         },
@@ -126,6 +130,8 @@ def seed_users():
             'username': 'admin',
             'email': 'admin@example.com',
             'password': '12345678',
+            'first_name': 'Anna',
+            'last_name': 'Wiśniewska',
             'role': 'admin',
             'manager_id': None
         }
@@ -156,6 +162,8 @@ def seed_users():
             username=user_data['username'],
             email=user_data['email'],
             password=hashed_password,
+            first_name=user_data['first_name'],
+            last_name=user_data['last_name'],
             role=user_data['role'],
             is_active=True,
             manager_id=user_data.get('manager_id')

@@ -19,6 +19,22 @@ BEGIN
     ) THEN
         ALTER TABLE "employee" ADD COLUMN "manager_id" integer;
     END IF;
+
+    -- Add first_name column
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'employee' AND column_name = 'first_name'
+    ) THEN
+        ALTER TABLE "employee" ADD COLUMN "first_name" varchar(100) DEFAULT 'User' NOT NULL;
+    END IF;
+
+    -- Add last_name column
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'employee' AND column_name = 'last_name'
+    ) THEN
+        ALTER TABLE "employee" ADD COLUMN "last_name" varchar(100) DEFAULT 'User' NOT NULL;
+    END IF;
 END $$;
 
 -- Add foreign key constraint for manager_id if it doesn't exist

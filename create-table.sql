@@ -3,6 +3,8 @@ CREATE TABLE "employee" (
   "username" varchar(120) UNIQUE NOT NULL,
   "email" varchar(120) UNIQUE NOT NULL,
   "password" varchar(255) NOT NULL,
+  "first_name" varchar(100) DEFAULT 'User' NOT NULL,
+  "last_name" varchar(100) DEFAULT 'User' NOT NULL,
   "is_active" boolean DEFAULT true NOT NULL,
   "role" varchar(50) DEFAULT 'employee' NOT NULL,
   "manager_id" integer,
